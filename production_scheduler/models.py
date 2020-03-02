@@ -3,8 +3,8 @@ from django.conf import settings
 
 class Product(models.Model):
     product_sku = models.CharField(max_length=25, primary_key=True)
-    product_name = models.CharField(max_length=100)
-    nombre_producto = models.CharField(max_length=100)
+    product_name = models.CharField(max_length=200)
+    nombre_producto = models.CharField(max_length=200)
 
     def __str__(self):
         return self.product_name
@@ -14,8 +14,6 @@ class Seamstress(models.Model):
     seamstress_id = models.AutoField(primary_key=True)
     username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     workshop = models.CharField(max_length=50)
-    seamstress_name = models.CharField(max_length=50)
-    seamstress_lastname = models.CharField(max_length=50)
 
     def __str__(self):
         return self.seamstress_name
@@ -31,21 +29,24 @@ class LineItem(models.Model):
     order_id = models.CharField(max_length=20)
     order_number = models.CharField(max_length=20)
     created_at = models.DateField()
-    assigned_to = models.CharField(max_length=25)
+    assigned_to = models.ForeignKey(Seamstress, on_delete=models.SET_NULL, blank=True, null=True)
     #Choices
     NEW = 0
     ASSIGNED = 1
     CUTTING = 2
-    OJALES = 3
-    READY = 4
+    ARMANDO = 3
+    TERMINADA = 4
+    ENTREGADA = 5
     STATUS_CHOICES = (
-    (NEW, 'New'),
-    (ASSIGNED, 'Assigned'),
-    (CUTTING, 'Cutting'),
-    (OJALES, 'Ojales'),
-    (READY, 'Ready')
+    (NEW, 'Nueva'),
+    (ASSIGNED, 'Asignada'),
+    (CUTTING, 'Cortando'),
+    (ARMANDO, 'Armando'),
+    (TERMINADA, 'Terminada'),
+    (ENTREGADA, 'Entregada')
     )
     status = models.IntegerField(default=0, choices=STATUS_CHOICES)
+    fecha_entrega = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return self.title

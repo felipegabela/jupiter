@@ -6,7 +6,7 @@ from .models import Propiedades
 from .models import Message
 
 admin.site.register(Product)
+admin.site.register(Propiedades)
 admin.site.register(Seamstress)
 admin.site.register(LineItem)
-admin.site.register(Propiedades)
 admin.site.register(Message)
