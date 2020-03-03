@@ -1,8 +1,9 @@
 from django.urls import path
+from django.contrib.auth.decorators import login_required, permission_required
 
 from . import views
 
 app_name = 'production_scheduler'
 urlpatterns = [
-    path('', views.home, name='production_scheduler-home'),
+    path('', login_required(views.HomeView.as_view()), name='home'),
 ]
