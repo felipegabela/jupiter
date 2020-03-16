@@ -1,6 +1,12 @@
 from .models import LineItem
 from .models import Product
 
+#Retrieve new orders from database
+def retrieve_new_orders():
+    line_items = LineItem.objects.filter(status=0) #status = NEW
+    line_items_list = [item for item in line_items]
+    return line_items_list
+
 #Save new orders to database
 def save_new_orders(orders):
     for order in orders:

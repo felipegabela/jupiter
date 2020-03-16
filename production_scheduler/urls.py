@@ -5,5 +5,6 @@ from . import views
 
 app_name = 'production_scheduler'
 urlpatterns = [
-    path('', login_required(views.HomeView.as_view()), name='home'),
+    path('', views.HomeView.as_view(), name='home'),
+    path('assign_order/', views.assign_order, name='assign_order'),
 ]

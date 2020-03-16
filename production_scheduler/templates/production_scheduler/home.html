@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
+{% load widget_tweaks %}
+{% load user_group_validation %}
 
 {% block content %}
 
@@ -19,7 +21,6 @@
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">line_item_id</th>
       <th scope="col" onclick="sortTable(1, 'new_orders_table')"># Orden <i class="fa fa-fw fa-sort"></th>
       <th scope="col">Producto</th>
       <th scope="col">Cantidad</th>
@@ -29,37 +30,53 @@
       <th scope="col">Entregado</th>
       <th scope="col">Nota</th>
       <th scope="col">Detalles</th>
-      <th scope="col">Asignar</th>
+      {% if request.user|has_group:"coordinator" %}
+        <th scope="col">Asignar</th>
+      {% endif %}
+      {% if request.user|has_group:"coordinator" %}
+        <th scope="col">Marcar cómo asignada</th>
+      {% endif %}
     </tr>
   </thead>
   <tbody>
     {% for line_item in line_items_list %}
       <tr>
         <th scope="row">{{ forloop.counter }}</th>
-        <td>{{ line_item.line_item_id }}</td>
         <td>{{ line_item.order_number }}</td>
         <td>{{ line_item.title }}</td>
         <td>{{ line_item.quantity }}</td>
         <td>{{ line_item.created_at }}</td>
-        <td>{{ line_item.assigned_to }}</td>
+        <td id='{{ line_item.line_item_id }}assigned_filed'>{{ line_item.assigned_to }}</td>
         <td>{{ line_item.get_status_display }}</td>
         <td>{{ line_item.fecha_entrega }}</td>
         <td>{{ line_item.special_instructions }}</td>
         <td>
           <button type="button" class="btn btn-sm btn-dark" title="Detalles" data-toggle="popover" data-content= '{{ line_item.variant_title }}' >Ver</button>
         </td>
+        {% if request.user|has_group:"coordinator" %}
         <td>
-          <form method="post">
+          <form method="POST" class="assignment_form" action='.' data-url='{{ request.build_absolute_uri|safe }}'">
             {% csrf_token %}
-            {{ assign_form|crispy }}
+            {{ form| crispy}}
             <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
             <button type="submit" class="btn btn-sm btn-dark">Asignar</button>
           </form>
         </td>
+        {% endif %}
+        {% if request.user|has_group:"coordinator" %}
+        <td>
+          <form method="POST" class="assignment_form" action='.' data-url='{{ request.build_absolute_uri|safe }}'">
+            {% csrf_token %}
+            {{ form| crispy}}
+            <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
+            <button type="submit" class="btn btn-sm btn-dark">Asignar</button>
+          </form>
+        </td>
+        {% endif %}
       </tr>
     {% endfor %}
   </tbody>
 </table>
 </div>
 
-  {% endblock content %}
+{% endblock content %}
