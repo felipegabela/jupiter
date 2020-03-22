@@ -55,21 +55,22 @@
         </td>
         {% if request.user|has_group:"coordinator" %}
         <td>
-          <form method="POST" class="assignment_form" action='.' data-url='{{ request.build_absolute_uri|safe }}'">
+          <form method="POST" class="assignment_form" action="{% url 'production_scheduler:assign_line_item_to_seamstress' %}">
             {% csrf_token %}
             {{ form| crispy}}
             <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
-            <button type="submit" class="btn btn-sm btn-dark">Asignar</button>
+            <input type="hidden" id="assign_line_item_to_seamstress" name="assign_line_item_to_seamstress">
+            <button type="submit" class="btn btn-sm btn-block btn-dark">Asignar</button>
           </form>
         </td>
         {% endif %}
         {% if request.user|has_group:"coordinator" %}
         <td>
-          <form method="POST" class="assignment_form" action='.' data-url='{{ request.build_absolute_uri|safe }}'">
+          <form method="POST" class="dismiss" action="{% url 'production_scheduler:change_line_item_status' %}">
             {% csrf_token %}
-            {{ form| crispy}}
             <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
-            <button type="submit" class="btn btn-sm btn-dark">Asignar</button>
+            <input type="hidden" id="change_line_item_status" name="change_line_item_status">
+            <button type="submit" class="btn btn-sm btn-dark">Dismiss</button>
           </form>
         </td>
         {% endif %}
