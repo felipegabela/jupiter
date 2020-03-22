@@ -12,12 +12,12 @@ class Product(models.Model):
 
 class Seamstress(models.Model):
     seamstress_id = models.AutoField(primary_key=True)
+    alias = models.CharField(max_length=100, blank=True, null=True)
     username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     workshop = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.seamstress_name
-
+        return self.alias
 
 class LineItem(models.Model):
     line_item_id = models.CharField(max_length=50, primary_key=True)
@@ -30,6 +30,7 @@ class LineItem(models.Model):
     order_number = models.CharField(max_length=20)
     created_at = models.DateField()
     assigned_to = models.ForeignKey(Seamstress, on_delete=models.SET_NULL, blank=True, null=True)
+    special_instructions = models.CharField(max_length=300, blank=True, null=True)
     #Choices
     NEW = 0
     ASSIGNED = 1

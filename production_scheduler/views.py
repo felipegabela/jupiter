@@ -1,93 +1,102 @@
-from django.shortcuts import get_object_or_404, render, redirect
-from django.conf import settings
-from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import cache_control
-from requests.auth import HTTPBasicAuth
-from requests.exceptions import Timeout
-from requests.exceptions import ConnectionError
-from .models import LineItem
-from .models import Product
-
 import urllib.parse
 import requests
 
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
-@login_required
-def home(request):
-    #Default initialization of context params.
-    response_status = None
-    timeout = False
-    connection_error = False
-    http_error = False
-    orders = []
+from django.shortcuts import render, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.views.generic import View
+from django.urls import reverse
+from requests.auth import HTTPBasicAuth
+from django.http import JsonResponse
+from requests.exceptions import Timeout
+from requests.exceptions import ConnectionError
 
-    #Shopify Order API Testing
-    url = 'https://@remu-international.myshopify.com/admin/api/2020-01/orders.json?'
-    user = '6e4440f817fb00deef93767c52f24830'
-    password = 'c2bf6e5be194d46e2d8b7b6b3b137a4f'
+from .models import LineItem
+from .models import Product
+from .models import Seamstress
+from .utilities import save_new_orders, retrieve_new_orders
+from .forms import AssignForm
 
-    #GET API call
-    query_params={
-        'fields': 'order_number, id, created_at, fulfillment_status, line_items',
-        'limit': '50', 'status': 'any'} #status = any, fulfilled, ''
-    try:
-        response = requests.get(
-            url, params = query_params, verify = True, timeout = 5,
-            auth=HTTPBasicAuth(user, password))
+#from django.conf import settings
+#from django.http import Http404
+#from django.contrib.auth import logout
+#from django.views.decorators.cache import cache_control, never_cache
+#from django.http import HttpResponseRedirect, HttpResponse
+#from django.shortcuts import get_object_or_404
 
-    except Timeout as e:
-        timeout = True
-        print(e)
-    except ConnectionError as e:
-        connection_error = True
-        print(e)
-    except requests.exceptions.RequestException as e:
-        http_error = True
-        print(e)
+class HomeView(LoginRequiredMixin, View):
+    def get(self, request):
+        template_name='production_scheduler/home.html'
+        response_status = None
+        timeout, connection_error, http_error = [False] * 3
+        orders = []
+        form = AssignForm
 
-    else:
-        #Checking response status
-        response_status = response.status_code
-        if response_status == 200:
-            response_body = response.json()
-            orders = response_body['orders']
+        #Shopify Order API
+        url = 'https://@remu-international.myshopify.com/admin/api/2020-01/orders.json?'
+        user = '6e4440f817fb00deef93767c52f24830'
+        password = 'c2bf6e5be194d46e2d8b7b6b3b137a4f'
+        #GET API call
+        query_params={
+            'fields': 'order_number, id, created_at, fulfillment_status, line_items',
+            'limit': '50', 'status': 'any' # or fulfilled
+            }
+        try:
+            response = requests.get(
+                url, params = query_params, verify = True, timeout = 5,
+                auth=HTTPBasicAuth(user, password)
+                )
+        #Error Handling
+        except Timeout as e:
+            timeout = True
+        except ConnectionError as e:
+            connection_error = True
+        except requests.exceptions.RequestException as e:
+            http_error = True
+
+        #Succesfull API call
         else:
-            response_body = 'An error has occured. Error code ' + str(response_status)
+            response_status = response.status_code
+            if response_status == 200:
+                response_body = response.json()
+                orders = response_body['orders']
+            else:
+                response_body = 'An error has occured. HTTP response code ' + str(response_status)
 
-    #Save new orders to database
-    for order in orders:
-       for item in order['line_items']:
+        #Save new orders to database
+        save_new_orders(orders)
+        #Retrieve new others from data base
+        line_items_list = retrieve_new_orders()
 
-           #Checking if item has not been fulfilled yet
-           if order['fulfillment_status'] is None:
+        context = {
+            'line_items_list': line_items_list,'http_status': response_status,
+            'timeout': timeout, 'connection_error': connection_error,
+            'http_error' : http_error, 'form' : form,
+            }
 
-               #Checking that product is not already in the database
-               if not LineItem.objects.filter(line_item_id=item['id']).exists():
-                   product = Product.objects.get(product_sku=item['sku'])
-                   nombre_producto = product.nombre_producto
-                   split = nombre_producto.split(";")
-                   product_title= split[0]
-                   product_variant_title= split[1]
+        return render(request, template_name, context)
 
-                   #Transforming Date
-                   datetime = order['created_at']
-                   tmp = datetime.split("T")
-                   date = tmp[0]
 
-                   new_line_item = LineItem(
-                       line_item_id=item['id'], title=product_title, quantity=item['quantity'],
-                       product_sku=item['sku'], properties=False, variant_title=product_variant_title,
-                       order_id=order['id'], order_number=order['order_number'],
-                       created_at=date, status=0)
-                   new_line_item.save()
-
-    #Retrieve unassigened others from data base
-    line_items = LineItem.objects.filter(status=0)
-    line_items_list = [item for item in line_items]
-
-    context = {
-        'line_items_list': line_items_list,'http_status': response_status,
-        'timeout': timeout, 'connection_error': connection_error, 'http_error' : http_error
+@login_required()
+def assign_line_item_to_seamstress(request):
+    if request.is_ajax() and 'assign_line_item_to_seamstress' in request.POST and request.method == "POST" :
+        assign_input = request.POST['assign']
+        line_item_id = request.POST['line_item_id']
+        to_update = LineItem.objects.filter(line_item_id=line_item_id).update(assigned_to=assign_input)
+        new_assignment = Seamstress.objects.filter(seamstress_id=assign_input)
+        data = {
+            'message': "Assigment Successful.",
+            'line_item_id': line_item_id,
+            'new_assigment': new_assignment[0].alias
         }
-    return render(request, 'production_scheduler/home.html', context)
+        return JsonResponse(data)
+    else:
+        return redirect('production_scheduler:home')
+
+
+@login_required()
+def change_line_item_status(request):
+    if 'change_line_item_status' in request.POST and request.method == "POST":
+        line_item_id = request.POST['line_item_id']
+        to_update = LineItem.objects.filter(line_item_id=line_item_id).update(status=1) #ASSIGNED = 1
+    return redirect('production_scheduler:home')

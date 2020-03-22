@@ -1,4 +1,6 @@
 {% load static %}
+{% load user_group_validation %}
+
 <!DOCTYPE html>
 <html lang="es" dir="ltr">
   <head>
@@ -6,19 +8,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap CSS-->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-    <title>Production Scheduler</title>
-
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!--Login CSS-->
     <link href="{% static 'production_scheduler/css/login.css' %}" rel="stylesheet">
 
+    <title>Production Scheduler</title>
+
+
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-    <!-- Font Awesome-->
-    <script src="https://kit.fontawesome.com/6a33ec907b.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- Production Scheduler JavaScript-->
+    <script src="{% static 'production_scheduler/js/production_scheduler.js' %}"></script>
 
   </head>
   <body>
@@ -32,22 +34,32 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="#">Tab 1 <span class="sr-only">(current)</span></a>
+              <a class="nav-link" href="#">Nuevas Ordenes <span class="sr-only">(current)</span></a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Tab 2</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Tab 3
-              </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="#">Option 1</a>
-                <a class="dropdown-item" href="#">Option 2</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">Option 3</a>
-              </div>
-            </li>
+            {% if request.user|has_group:"coordinator" %}
+              <li class="nav-item">
+                <a class="nav-link" href="#">Ordenes Asignadas</a>
+              </li>
+            {% endif %}
+            {% if request.user|has_group:"coordinator" %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Reportes
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="#">Option 1</a>
+                  <a class="dropdown-item" href="#">Option 2</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#">Option 3</a>
+                </div>
+              </li>
+            {% endif %}
+            {% if request.user|has_group:"seamstress" %}
+              <li class="nav-item">
+                <a class="nav-link" href="#">Historial</a>
+              </li>
+            {% endif %}
+
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <!-- Navbar Right Side -->
@@ -67,29 +79,51 @@
         </div>
       </nav>
 
-    <main role="main" class="container">
+    <main role="main" class="container-fluid">
       <div class="row">
-        <div class="col-md-8">
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
+        <div class="col-md-12">
           {% block content %}{% endblock %}
         </div>
       </div>
     </main>
 
 
-    <script>
+    <script type="text/javascript">
       $(document).ready(function(){
+        //Data Popover
         $('[data-toggle="popover"]').popover();
       });
-    </script>
 
-    <!-- Production Scheduler JavaScript-->
-    <script src="{% static 'production_scheduler/js/production_scheduler.js' %}"></script>
+      $(document).ready(function(){
+        //Ajax Call AssignForm
+        $('.assignment_form').submit(function(event){
+          event.preventDefault();
+          var $formData = $(this).serialize()
+          var $thisURL = $('.assignment_form').attr('action') //|| window.location.href
+          $.ajax({
+            method: "POST",
+            url: $thisURL,
+            data: $formData,
+            success: handleFormSuccess,
+            error: handleFormError,
+          })
+          function handleFormSuccess(data, textStatus, jqXHR){
+            console.log(data)
+            console.log(textStatus)
+            console.log(jqXHR)
+            var $line_item_id = data.line_item_id
+            var $assign_field = $line_item_id + 'assigned_filed'
+            $('#' + $assign_field).html(data.new_assigment);
+          }
+
+          function handleFormError(jqXHR, textStatus, errorThrown){
+              console.log(jqXHR)
+              console.log(textStatus)
+              console.log(errorThrown)
+          }
+
+        });
+      });
+    </script>
 </body>
 </html>
