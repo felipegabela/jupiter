@@ -33,8 +33,8 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Nuevas Ordenes <span class="sr-only">(current)</span></a>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'production_scheduler:home' %}">Nuevas Ordenes <span class="sr-only">(current)</span></a>
             </li>
             {% if request.user|has_group:"coordinator" %}
               <li class="nav-item">
@@ -56,7 +56,7 @@
             {% endif %}
             {% if request.user|has_group:"seamstress" %}
               <li class="nav-item">
-                <a class="nav-link" href="#">Historial</a>
+                <a class="nav-link" href="{% url 'production_scheduler:historial' %}">Historial</a>
               </li>
             {% endif %}
 
@@ -112,8 +112,36 @@
             console.log(textStatus)
             console.log(jqXHR)
             var $line_item_id = data.line_item_id
-            var $assign_field = $line_item_id + 'assigned_filed'
-            $('#' + $assign_field).html(data.new_assigment);
+            var $assign_field = $line_item_id + 'assigned_field'
+            $('#' + $assign_field).html(data.assigned_to);
+          }
+
+          function handleFormError(jqXHR, textStatus, errorThrown){
+              console.log(jqXHR)
+              console.log(textStatus)
+              console.log(errorThrown)
+          }
+
+        });
+        //Ajax Call StatusForm
+        $('.update_line_item_status').submit(function(event){
+          event.preventDefault();
+          var $formData = $(this).serialize()
+          var $thisURL = $('.update_line_item_status').attr('action')
+          $.ajax({
+            method: "POST",
+            url: $thisURL,
+            data: $formData,
+            success: handleFormSuccess,
+            error: handleFormError,
+          })
+          function handleFormSuccess(data, textStatus, jqXHR){
+            console.log(data)
+            console.log(textStatus)
+            console.log(jqXHR)
+            var $line_item_id = data.line_item_id
+            var $status_field = $line_item_id + 'status_field'
+            $('#' + $status_field).html(data.new_status);
           }
 
           function handleFormError(jqXHR, textStatus, errorThrown){

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+{% load user_group_validation %}
+
+{% block content %}
+<br>
+<div class="table-responsive">
+<table id ="new_orders_table" class="table table-striped table-bordered .table-hover" cellspacing="0">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col" onclick="sortTable(1, 'new_orders_table')"># Orden <i class="fa fa-fw fa-sort"></th>
+      <th scope="col">Producto</th>
+      <th scope="col">Cantidad</th>
+      <th scope="col">Fecha Orden</th>
+      <th scope="col">Asignado a</th>
+      <th scope="col">Estado</th>
+      <th scope="col">Entregado</th>
+      <th scope="col">Nota</th>
+      <th scope="col">Detalles</th>
+      <th scope="col">Actualizar Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for line_item in line_items_list %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>{{ line_item.order_number }}</td>
+        <td>{{ line_item.title }}</td>
+        <td>{{ line_item.quantity }}</td>
+        <td>{{ line_item.created_at }}</td>
+        <td>{{ line_item.assigned_to }}</td>
+        <td id='{{ line_item.line_item_id }}status_field'>{{ line_item.get_status_display }}</td>
+        <td>{{ line_item.fecha_entrega }}</td>
+        <td>{{ line_item.special_instructions }}</td>
+        <td>
+          <button type="button" class="btn btn-sm btn-dark" title="Detalles" data-toggle="popover" data-content= '{{ line_item.variant_title }}' >Ver</button>
+        </td>
+        <td>
+          <form method="POST" class="update_line_item_status" action="{% url 'production_scheduler:update_line_item_status' %}">
+            {% csrf_token %}
+            {{ form| crispy}}
+            <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
+            <input type="hidden" id="update_line_item_status" name="update_line_item_status">
+            <button type="submit" class="btn btn-sm btn-block btn-dark">Actualizar</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% endblock content %}

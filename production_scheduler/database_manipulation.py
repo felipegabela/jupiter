@@ -1,10 +1,33 @@
 from .models import LineItem
 from .models import Product
 
-#Retrieve new orders from database
-def retrieve_new_orders():
-    line_items = LineItem.objects.filter(status=0) #status = NEW
+#Assign order to seamstress
+def assign_line_item_to_seamstress__(line_item_id, seamstress_id):
+    to_update = LineItem.objects.filter(line_item_id=line_item_id).update(assigned_to=seamstress_id)
+
+#Update line item status
+def update_line_item_status__(line_item_id, status):
+    to_update = LineItem.objects.filter(line_item_id=line_item_id).update(status=status)
+
+#Retrieve orders from database by status
+def retrieve_orders_by_status__(status):
+    line_items = LineItem.objects.filter(status=status)
     line_items_list = [item for item in line_items]
+    return line_items_list
+
+#Retrieve all orders assigned to a seamstress from database
+def retrieve_orders_assigned_to_seamstress__(seamstress_id):
+    line_items = LineItem.objects.filter(assigned_to=seamstress_id)
+    line_items_list = [item for item in line_items]
+    return line_items_list
+
+#Retrieve all orders in progresss assigned to a seamstress from database
+def retrieve_orders_in_progress_assigned_to_seamstress__(seamstress_id):
+    line_items = LineItem.objects.filter(assigned_to=seamstress_id)
+    line_items_list = []
+    for item in line_items:
+        if item.status != 5:
+            line_items_list.append(item)
     return line_items_list
 
 #Save new orders to database
