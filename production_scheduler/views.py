@@ -32,14 +32,14 @@ def historial(request):
             }
         return render(request, template_name, context)
     else:
-        return redirect('production_scheduler:home')
+        return redirect('production_scheduler:new_orders')
+#End Historial
 
-
-class HomeView(LoginRequiredMixin, View):
+class NewOrdersView(LoginRequiredMixin, View):
     def get(self, request):
         template_name, context= [None] * 2
 
-        #Seamstress Home View (New Orders)
+        #Seamstress View
         if self.request.user.groups.filter(name='seamstress').exists():
             template_name='production_scheduler/mis-ordenes.html'
             form = StatusForm
@@ -51,9 +51,9 @@ class HomeView(LoginRequiredMixin, View):
                 'line_items_list': line_items_list, 'form': form,
                 }
 
-        #Coordinator Home View (New Orders)
+        #Coordinator View
         if self.request.user.groups.filter(name='coordinator').exists():
-            template_name='production_scheduler/home.html'
+            template_name='production_scheduler/new_orders.html'
             response_status = None
             timeout, connection_error, http_error = [False] * 3
             orders = []
@@ -102,8 +102,11 @@ class HomeView(LoginRequiredMixin, View):
                 }
 
         return render(request, template_name, context)
+#End NewOrdersView
 
+#AJAX POST METHODS
 
+#Post method for line item assignment to seamstress
 @login_required()
 def assign_line_item_to_seamstress(request):
     if request.is_ajax() and 'assign_line_item_to_seamstress' in request.POST and request.method == "POST" :
@@ -117,16 +120,19 @@ def assign_line_item_to_seamstress(request):
         }
         return JsonResponse(data)
     else:
-        return redirect('production_scheduler:home')
+        return redirect('production_scheduler:new_orders')
 
-
+#Post method for line item assignment status update
 @login_required()
-def change_line_item_status(request):
-    if 'change_line_item_status' in request.POST and request.method == "POST":
+def uptdate_line_item_status_to_assigned(request):
+    if 'uptdate_line_item_status_to_assigned' in request.POST and request.method == "POST":
         line_item_id = request.POST['line_item_id']
         update_line_item_status__(line_item_id, 1) # Assigned = 1
-    return redirect('production_scheduler:home')
+    return redirect('production_scheduler:new_orders')
 
+#NON-AJAX POST METHODS
+
+#Post method for line item status update
 @login_required()
 def update_line_item_status(request):
     if request.is_ajax() and 'update_line_item_status' in request.POST and request.method == "POST" :
@@ -141,4 +147,4 @@ def update_line_item_status(request):
         }
         return JsonResponse(data)
     else:
-        return redirect('production_scheduler:home')
+        return redirect('production_scheduler:new_orders')

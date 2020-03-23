@@ -66,10 +66,10 @@
         {% endif %}
         {% if request.user|has_group:"coordinator" %}
         <td>
-          <form method="POST" class="dismiss" action="{% url 'production_scheduler:change_line_item_status' %}">
+          <form method="POST" class="dismiss" action="{% url 'production_scheduler:uptdate_line_item_status_to_assigned' %}">
             {% csrf_token %}
             <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
-            <input type="hidden" id="change_line_item_status" name="change_line_item_status">
+            <input type="hidden" id="uptdate_line_item_status_to_assigned" name="uptdate_line_item_status_to_assigned">
             <button type="submit" class="btn btn-sm btn-dark">Dismiss</button>
           </form>
         </td>
