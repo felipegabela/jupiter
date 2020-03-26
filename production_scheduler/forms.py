@@ -2,8 +2,8 @@ from django import forms
 from django.shortcuts import render
 from .models import Seamstress, LineItem
 
-class AssignForm(forms.Form):
-    assign = forms.ChoiceField( label=False,
+class SeamstressListForm(forms.Form):
+    seamstress_id = forms.ChoiceField( label=False,
         choices=[(seamstress.seamstress_id, seamstress.alias) for seamstress in Seamstress.objects.all()])
 
 class StatusForm(forms.Form):
