@@ -13,7 +13,7 @@ class Product(models.Model):
 class Seamstress(models.Model):
     seamstress_id = models.AutoField(primary_key=True)
     alias = models.CharField(max_length=100, blank=True, null=True)
-    username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     workshop = models.CharField(max_length=50)
 
     def __str__(self):
@@ -24,7 +24,6 @@ class LineItem(models.Model):
     title = models.CharField(max_length=100)
     quantity = models.IntegerField()
     product_sku = models.CharField(max_length=25)
-    properties = models.BooleanField()
     variant_title = models.CharField(max_length=100)
     order_id = models.CharField(max_length=20)
     order_number = models.CharField(max_length=20)
@@ -52,17 +51,9 @@ class LineItem(models.Model):
     def __str__(self):
         return self.title
 
-class Propiedades(models.Model):
-    line_item_id = models.ForeignKey(LineItem, on_delete=models.CASCADE)
-    field_name = models.CharField(max_length=50)
-    value = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.value
-
 class Message(models.Model):
     line_item_id = models.ForeignKey(LineItem, on_delete=models.CASCADE)
     message_body = models.TextField()
-    username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     order_number = models.CharField(max_length=20)
     publication_date = models.DateTimeField()

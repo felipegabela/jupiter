@@ -37,26 +37,21 @@
               <a class="nav-link" href="{% url 'production_scheduler:new_orders' %}">Nuevas Ordenes <span class="sr-only">(current)</span></a>
             </li>
             {% if request.user|has_group:"coordinator" %}
-              <li class="nav-item">
-                <a class="nav-link" href="#">Ordenes Asignadas</a>
-              </li>
-            {% endif %}
-            {% if request.user|has_group:"coordinator" %}
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Reportes
+                  Ordenes Asignadas
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <a class="dropdown-item" href="#">Option 1</a>
-                  <a class="dropdown-item" href="#">Option 2</a>
+                  <a class="dropdown-item" href="{% url 'production_scheduler:historial' option='produccion' filter='none' %}">En Producción</a>
+                  <a class="dropdown-item" href="{% url 'production_scheduler:historial' option='terminadas' filter='none' %}">Terminadas</a>
                   <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Option 3</a>
+                  <a class="dropdown-item" href="{% url 'production_scheduler:historial' option='entregadas' filter='none' %}">Entregadas</a>
                 </div>
               </li>
             {% endif %}
             {% if request.user|has_group:"seamstress" %}
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'production_scheduler:historial' %}">Historial</a>
+                <a class="nav-link" href="{% url 'production_scheduler:historial' option='costurera' filter='none' %}">Historial</a>
               </li>
             {% endif %}
 
@@ -66,9 +61,6 @@
             <div class="navbar-nav">
               {% if user.is_authenticated %}
                 <p class="nav-item nav-link disabled">Hola, {{ user.username }}</p>
-                {% if request.user.is_staff %}
-                  <a class="nav-item nav-link" href="admin/">Admin</a>
-                {% endif %}
                 <a class="nav-item nav-link" href="#">Profile</a>
                 <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
               {% else %}
@@ -95,7 +87,7 @@
       });
 
       $(document).ready(function(){
-        //Ajax Call AssignForm
+        //Ajax Call Assigment Form
         $('.assignment_form').submit(function(event){
           event.preventDefault();
           var $formData = $(this).serialize()
@@ -123,6 +115,7 @@
           }
 
         });
+
         //Ajax Call StatusForm
         $('.update_line_item_status').submit(function(event){
           event.preventDefault();
@@ -152,6 +145,7 @@
 
         });
       });
+      //End document.ready
     </script>
 </body>
 </html>

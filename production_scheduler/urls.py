@@ -6,8 +6,8 @@ from . import views
 app_name = 'production_scheduler'
 urlpatterns = [
     path('', views.NewOrdersView.as_view(), name='new_orders'),
-    path('historial/', views.historial, name='historial'),
-    path('uptdate_line_item_status_to_assigned/', views.uptdate_line_item_status_to_assigned, name='uptdate_line_item_status_to_assigned'),
-    path('assign_line_item_to_seamstress/', views.assign_line_item_to_seamstress, name='assign_line_item_to_seamstress'),
+    path('historial/<option>/<filter>', views.historial, name='historial'),
+    path('assign_line_item_to_seamstress/<option>', views.assign_line_item_to_seamstress, name='assign_line_item_to_seamstress'),
     path('update_line_item_status/', views.update_line_item_status, name='update_line_item_status'),
+    path('filter_line_items_by_seamstress/<callback>', views.filter_line_items_by_seamstress, name='filter_line_items_by_seamstress'),
 ]

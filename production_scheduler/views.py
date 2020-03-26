@@ -1,7 +1,9 @@
 import urllib.parse
 import requests
+import numbers
 
 from django.shortcuts import render, redirect
+from django.http import Http404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import View
@@ -15,20 +17,72 @@ from .models import LineItem
 from .models import Product
 from .models import Seamstress
 from .database_manipulation import *
-from .forms import AssignForm, StatusForm
+from .forms import SeamstressListForm, StatusForm
 
 @login_required()
-def historial(request):
+def historial(request, option, filter):
     template_name = None
+
     #Historial Seamstress View
-    if request.user.groups.filter(name='seamstress').exists():
+    if (request.user.groups.filter(name='seamstress').exists()
+            and option == 'costurera') :
         template_name='production_scheduler/historial.html'
-        #Retrieve new others from data base
+        #Retrieve all line items assigned to seamstress from data base
         user_id = request.user.id
         seamstress_id = Seamstress.objects.get(username=user_id).seamstress_id
         line_items_list = retrieve_orders_assigned_to_seamstress__(seamstress_id)
         context = {
             'line_items_list': line_items_list,
+            'option': option,
+            }
+        return render(request, template_name, context)
+
+    #Lista chaquetas en produccion: Coodinator View
+    elif (request.user.groups.filter(name='coordinator').exists()
+            and option == 'produccion') :
+        template_name='production_scheduler/historial.html'
+        form = SeamstressListForm
+        #Retrieve all current line items in production from data base
+        if filter != 'none':
+            line_items_list = retrieve_orders_in_production_by_seamstress__(filter)
+        else:
+            line_items_list = retrieve_orders_in_production_by_seamstress__(None)
+        context = {
+            'line_items_list': line_items_list,
+            'option': option, 'coordinator': True,
+            'form': form,
+            }
+        return render(request, template_name, context)
+
+    #Lista chaquetas terminadas: Coodinator View
+    elif (request.user.groups.filter(name='coordinator').exists()
+            and option == 'terminadas') :
+        template_name='production_scheduler/historial.html'
+        form = SeamstressListForm
+        if filter != 'none':
+            line_items_list = retrieve_orders_by_status_seamstress__(4, filter) #4 = Terminada
+        else:
+            line_items_list = retrieve_orders_by_status__(4) #4 = Terminada
+        context = {
+            'line_items_list': line_items_list,
+            'option': option, 'coordinator': True,
+            'form': form, 'callback_path': request.path,
+            }
+        return render(request, template_name, context)
+
+    #Historial chaquetas entregadas: Coodinator View
+    elif (request.user.groups.filter(name='coordinator').exists()
+            and option == 'entregadas') :
+        template_name='production_scheduler/historial.html'
+        form = SeamstressListForm
+        if filter != 'none':
+            line_items_list = retrieve_orders_by_status_seamstress__(5, filter) #5 = Entregadas
+        else:
+            line_items_list = retrieve_orders_by_status__(5) #5 = Entregadas
+        context = {
+            'line_items_list': line_items_list,
+            'option': option, 'coordinator': True,
+            'form': form,
             }
         return render(request, template_name, context)
     else:
@@ -57,7 +111,7 @@ class NewOrdersView(LoginRequiredMixin, View):
             response_status = None
             timeout, connection_error, http_error = [False] * 3
             orders = []
-            form = AssignForm
+            form = SeamstressListForm
 
             #Shopify Order API
             url = 'https://@remu-international.myshopify.com/admin/api/2020-01/orders.json?'
@@ -104,13 +158,13 @@ class NewOrdersView(LoginRequiredMixin, View):
         return render(request, template_name, context)
 #End NewOrdersView
 
-#AJAX POST METHODS
-
-#Post method for line item assignment to seamstress
+#Post method to assign line item to seamstress
 @login_required()
-def assign_line_item_to_seamstress(request):
-    if request.is_ajax() and 'assign_line_item_to_seamstress' in request.POST and request.method == "POST" :
-        seamstress_id = request.POST['assign']
+def assign_line_item_to_seamstress(request, option):
+    #Assign line item to seamstress
+    if (request.is_ajax() and 'assign_line_item_to_seamstress' in request.POST
+            and request.method == "POST" and option == 'assign'):
+        seamstress_id = request.POST['seamstress_id']
         line_item_id = request.POST['line_item_id']
         assign_line_item_to_seamstress__(line_item_id, seamstress_id)
         data = {
@@ -119,18 +173,27 @@ def assign_line_item_to_seamstress(request):
             'assigned_to': Seamstress.objects.get(seamstress_id=seamstress_id).alias
         }
         return JsonResponse(data)
+    #Change line item status to assigned
+    elif ('uptdate_line_item_status_to_assigned' in request.POST
+            and request.method == "POST" and option == 'change_status'):
+        line_item_id = request.POST['line_item_id']
+        update_line_item_status__(line_item_id, 1) # Assigned = 1
+        return redirect('production_scheduler:new_orders')
+
     else:
         return redirect('production_scheduler:new_orders')
 
-#Post method for line item assignment status update
 @login_required()
-def uptdate_line_item_status_to_assigned(request):
-    if 'uptdate_line_item_status_to_assigned' in request.POST and request.method == "POST":
-        line_item_id = request.POST['line_item_id']
-        update_line_item_status__(line_item_id, 1) # Assigned = 1
-    return redirect('production_scheduler:new_orders')
-
-#NON-AJAX POST METHODS
+def filter_line_items_by_seamstress(request, callback):
+    if (request.method == "POST"):
+        if request.POST['action'] == 'filter':
+            filter = request.POST['seamstress_id']
+        elif request.POST['action'] == 'reset':
+            filter = 'none'
+        else:
+            filter = 'none'
+        return redirect('production_scheduler:historial', option=callback, filter=filter)
+    raise(Http404)
 
 #Post method for line item status update
 @login_required()

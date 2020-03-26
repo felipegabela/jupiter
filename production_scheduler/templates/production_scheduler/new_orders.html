@@ -55,7 +55,7 @@
         </td>
         {% if request.user|has_group:"coordinator" %}
         <td>
-          <form method="POST" class="assignment_form" action="{% url 'production_scheduler:assign_line_item_to_seamstress' %}">
+          <form method="POST" class="assignment_form" action="{% url 'production_scheduler:assign_line_item_to_seamstress' option='assign' %}">
             {% csrf_token %}
             {{ form| crispy}}
             <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
@@ -66,7 +66,7 @@
         {% endif %}
         {% if request.user|has_group:"coordinator" %}
         <td>
-          <form method="POST" class="dismiss" action="{% url 'production_scheduler:uptdate_line_item_status_to_assigned' %}">
+          <form method="POST" class="dismiss" action="{% url 'production_scheduler:assign_line_item_to_seamstress' option='change_status' %}">
             {% csrf_token %}
             <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
             <input type="hidden" id="uptdate_line_item_status_to_assigned" name="uptdate_line_item_status_to_assigned">
