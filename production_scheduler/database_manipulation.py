@@ -9,6 +9,10 @@ def assign_line_item_to_seamstress__(line_item_id, seamstress_id):
 def update_line_item_status__(line_item_id, status):
     to_update = LineItem.objects.filter(line_item_id=line_item_id).update(status=status)
 
+#Update line item special instructions
+def update_line_time_special_instructions__(line_item_id, nota):
+    to_update = LineItem.objects.filter(line_item_id=line_item_id).update(special_instructions=nota)
+
 #Retrieve line items from database by status
 def retrieve_orders_by_status__(status):
     line_items = LineItem.objects.filter(status=status)

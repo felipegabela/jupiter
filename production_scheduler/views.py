@@ -17,7 +17,7 @@ from .models import LineItem
 from .models import Product
 from .models import Seamstress
 from .database_manipulation import *
-from .forms import SeamstressListForm, StatusForm
+from .forms import SeamstressListForm, StatusForm, LineItemEntregadaForm, LineItemSpecialInstructionsForm
 
 @login_required()
 def historial(request, option, filter):
@@ -41,7 +41,7 @@ def historial(request, option, filter):
     elif (request.user.groups.filter(name='coordinator').exists()
             and option == 'produccion') :
         template_name='production_scheduler/historial.html'
-        form = SeamstressListForm
+        seamstressListForm = SeamstressListForm
         #Retrieve all current line items in production from data base
         if filter != 'none':
             line_items_list = retrieve_orders_in_production_by_seamstress__(filter)
@@ -50,7 +50,7 @@ def historial(request, option, filter):
         context = {
             'line_items_list': line_items_list,
             'option': option, 'coordinator': True,
-            'form': form,
+            'seamstressListForm': seamstressListForm,
             }
         return render(request, template_name, context)
 
@@ -58,7 +58,8 @@ def historial(request, option, filter):
     elif (request.user.groups.filter(name='coordinator').exists()
             and option == 'terminadas') :
         template_name='production_scheduler/historial.html'
-        form = SeamstressListForm
+        seamstressListForm = SeamstressListForm
+        lineItemEntregadaForm = LineItemEntregadaForm
         if filter != 'none':
             line_items_list = retrieve_orders_by_status_seamstress__(4, filter) #4 = Terminada
         else:
@@ -66,7 +67,8 @@ def historial(request, option, filter):
         context = {
             'line_items_list': line_items_list,
             'option': option, 'coordinator': True,
-            'form': form, 'callback_path': request.path,
+            'seamstressListForm': seamstressListForm, 'callback_path': request.path,
+            'terminadas': True, 'lineItemEntregadaForm': lineItemEntregadaForm,
             }
         return render(request, template_name, context)
 
@@ -74,7 +76,8 @@ def historial(request, option, filter):
     elif (request.user.groups.filter(name='coordinator').exists()
             and option == 'entregadas') :
         template_name='production_scheduler/historial.html'
-        form = SeamstressListForm
+        seamstressListForm = SeamstressListForm
+        lineItemEntregadaForm = LineItemEntregadaForm
         if filter != 'none':
             line_items_list = retrieve_orders_by_status_seamstress__(5, filter) #5 = Entregadas
         else:
@@ -82,7 +85,8 @@ def historial(request, option, filter):
         context = {
             'line_items_list': line_items_list,
             'option': option, 'coordinator': True,
-            'form': form,
+            'seamstressListForm': seamstressListForm,
+            'entregadas' : True, 'lineItemEntregadaForm': lineItemEntregadaForm,
             }
         return render(request, template_name, context)
     else:
@@ -112,6 +116,7 @@ class NewOrdersView(LoginRequiredMixin, View):
             timeout, connection_error, http_error = [False] * 3
             orders = []
             form = SeamstressListForm
+            lineItemSpecialInstructionsForm = LineItemSpecialInstructionsForm
 
             #Shopify Order API
             url = 'https://@remu-international.myshopify.com/admin/api/2020-01/orders.json?'
@@ -153,6 +158,7 @@ class NewOrdersView(LoginRequiredMixin, View):
                 'line_items_list': line_items_list,'http_status': response_status,
                 'timeout': timeout, 'connection_error': connection_error,
                 'http_error' : http_error, 'form' : form,
+                'lineItemSpecialInstructionsForm': lineItemSpecialInstructionsForm,
                 }
 
         return render(request, template_name, context)
@@ -173,11 +179,13 @@ def assign_line_item_to_seamstress(request, option):
             'assigned_to': Seamstress.objects.get(seamstress_id=seamstress_id).alias
         }
         return JsonResponse(data)
-    #Change line item status to assigned
+    #Dismiss: change line item status to assigned
     elif ('uptdate_line_item_status_to_assigned' in request.POST
             and request.method == "POST" and option == 'change_status'):
         line_item_id = request.POST['line_item_id']
+        nota = request.POST['nota']
         update_line_item_status__(line_item_id, 1) # Assigned = 1
+        update_line_time_special_instructions__(line_item_id, nota)
         return redirect('production_scheduler:new_orders')
 
     else:
@@ -209,5 +217,12 @@ def update_line_item_status(request):
             'new_status': status_display_name
         }
         return JsonResponse(data)
+    elif 'update_line_item_status' in request.POST and request.method == "POST":
+        option = request.POST['option']
+        status = request.POST['status']
+        line_item_id = request.POST['line_item_id']
+        update_line_item_status__(line_item_id, status)
+        return redirect('production_scheduler:historial', option=option, filter='none')
+
     else:
         return redirect('production_scheduler:new_orders')
