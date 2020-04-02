@@ -28,7 +28,6 @@
       <th scope="col">Asignado a</th>
       <th scope="col">Estado</th>
       <th scope="col">Entregado</th>
-      <th scope="col">Nota</th>
       <th scope="col">Detalles</th>
       {% if request.user|has_group:"coordinator" %}
         <th scope="col">Asignar</th>
@@ -49,7 +48,6 @@
         <td id='{{ line_item.line_item_id }}assigned_field'>{{ line_item.assigned_to }}</td>
         <td>{{ line_item.get_status_display }}</td>
         <td>{{ line_item.fecha_entrega }}</td>
-        <td>{{ line_item.special_instructions }}</td>
         <td>
           <button type="button" class="btn btn-sm btn-dark" title="Detalles" data-toggle="popover" data-content= '{{ line_item.variant_title }}' >Ver</button>
         </td>
@@ -68,6 +66,7 @@
         <td>
           <form method="POST" class="dismiss" action="{% url 'production_scheduler:assign_line_item_to_seamstress' option='change_status' %}">
             {% csrf_token %}
+            {{ lineItemSpecialInstructionsForm | crispy }}
             <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
             <input type="hidden" id="uptdate_line_item_status_to_assigned" name="uptdate_line_item_status_to_assigned">
             <button type="submit" class="btn btn-sm btn-dark">Dismiss</button>

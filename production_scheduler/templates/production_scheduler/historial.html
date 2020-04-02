@@ -10,7 +10,7 @@
       <div class="col-sm-3">
         <form method="POST" id="filter_line_items_by_seamstress" action="{% url 'production_scheduler:filter_line_items_by_seamstress' callback=option %}">
           {% csrf_token %}
-          {{ form| crispy}}
+          {{ seamstressListForm| crispy}}
           <button type="submit" name='action' value = 'filter' class="btn btn-sm btn-dark">Filtrar</button>
           <button type="submit" name='action' value = 'reset' class="btn btn-sm btn-dark">Reset</button>
         </form>
@@ -32,6 +32,9 @@
       <th scope="col">Entregado</th>
       <th scope="col">Nota</th>
       <th scope="col">Detalles</th>
+      {% if entregadas == True  or terminadas == True %}
+        <th scope="col">Cambiar Estado</th>
+      {% endif %}
     </tr>
   </thead>
   <tbody>
@@ -49,6 +52,18 @@
         <td>
           <button type="button" class="btn btn-sm btn-dark" title="Detalles" data-toggle="popover" data-content= '{{ line_item.variant_title }}' >Ver</button>
         </td>
+        {% if entregadas == True  or terminadas == True %}
+          <td>
+            <form method="POST" action="{% url 'production_scheduler:update_line_item_status' %}">
+              {% csrf_token %}
+              {{ lineItemEntregadaForm | crispy }}
+              <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
+              <input type="hidden" id="update_line_item_status" name="update_line_item_status">
+              <input type="hidden" id="option" name="option" value='{{ option }}'>
+              <button type="submit" class="btn btn-sm btn-dark">Actualizar</button>
+            </form>
+          </td>
+        {% endif %}
       </tr>
     {% endfor %}
   </tbody>

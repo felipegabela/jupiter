@@ -37,13 +37,17 @@ class LineItem(models.Model):
     ARMANDO = 3
     TERMINADA = 4
     ENTREGADA = 5
+    ERROR = 6
+    CORRIGIENDO = 7
     STATUS_CHOICES = (
     (NEW, 'Nueva'),
     (ASSIGNED, 'Asignada'),
     (CUTTING, 'Cortando'),
     (ARMANDO, 'Armando'),
     (TERMINADA, 'Terminada'),
-    (ENTREGADA, 'Entregada')
+    (ENTREGADA, 'Entregada'),
+    (ERROR, 'Corregir Error'),
+    (CORRIGIENDO, 'Corrigiendo')
     )
     status = models.IntegerField(default=0, choices=STATUS_CHOICES)
     fecha_entrega = models.DateField(blank=True, null=True)
