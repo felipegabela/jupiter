@@ -2,6 +2,9 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
+<div class="row">
+  <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+     <div class="card-signin">
   <div class="content-section">
       <form method="POST">
           {% csrf_token %}
@@ -14,5 +17,8 @@
               <a href="?next=/admin" class="btn btn-outline-info">Admin</a>
           </div>
       </form>
+  </div>
+  </div>
+  </div>
   </div>
 {% endblock content %}

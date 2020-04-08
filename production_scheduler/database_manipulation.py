@@ -1,5 +1,5 @@
 from .models import LineItem
-from .models import Product
+from .models import Product, Message
 
 #Assign order to seamstress
 def assign_line_item_to_seamstress__(line_item_id, seamstress_id):
@@ -24,6 +24,12 @@ def retrieve_orders_by_status_seamstress__(status, seamstress):
     line_items = LineItem.objects.filter(status=status, assigned_to=seamstress)
     line_items_list = [item for item in line_items]
     return line_items_list
+
+#Retrieve messages from database assigned to and especific line_item
+def retrieve_messages_by_line_item__(line_item_id):
+    messages = Message.objects.filter(line_item_id=line_item_id)
+    messages_list = [item for item in messages]
+    return messages_list
 
 #Retrieve all current line items in production from data base
 def retrieve_orders_in_production_by_seamstress__(filter):

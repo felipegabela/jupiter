@@ -59,5 +59,4 @@ class Message(models.Model):
     line_item_id = models.ForeignKey(LineItem, on_delete=models.CASCADE)
     message_body = models.TextField()
     username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    order_number = models.CharField(max_length=20)
-    publication_date = models.DateTimeField()
+    publication_date = models.DateTimeField(auto_now_add=True)

@@ -10,4 +10,6 @@ urlpatterns = [
     path('assign_line_item_to_seamstress/<option>', views.assign_line_item_to_seamstress, name='assign_line_item_to_seamstress'),
     path('update_line_item_status/', views.update_line_item_status, name='update_line_item_status'),
     path('filter_line_items_by_seamstress/<callback>', views.filter_line_items_by_seamstress, name='filter_line_items_by_seamstress'),
+    path('mensajes/<line_item_id>', views.mensajes, name='mensajes'),
+    path('send_message/', views.send_message, name='send_message'),
 ]
