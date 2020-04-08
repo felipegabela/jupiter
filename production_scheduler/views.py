@@ -13,11 +13,24 @@ from django.http import JsonResponse
 from requests.exceptions import Timeout
 from requests.exceptions import ConnectionError
 
-from .models import LineItem
+from .models import LineItem, Message
 from .models import Product
 from .models import Seamstress
 from .database_manipulation import *
-from .forms import SeamstressListForm, StatusForm, LineItemEntregadaForm, LineItemSpecialInstructionsForm
+from .forms import *
+from users.models import CustomUser
+
+@login_required()
+def mensajes(request, line_item_id):
+    template_name = 'production_scheduler/mensajes.html'
+    form = MessageForm
+    mensajes = retrieve_messages_by_line_item__(line_item_id)
+    context = {
+                'line_item_id':line_item_id,
+                'form':form,
+                'mensajes':mensajes
+            }
+    return render(request, template_name, context)
 
 @login_required()
 def historial(request, option, filter):
@@ -172,6 +185,7 @@ def assign_line_item_to_seamstress(request, option):
             and request.method == "POST" and option == 'assign'):
         seamstress_id = request.POST['seamstress_id']
         line_item_id = request.POST['line_item_id']
+        #try
         assign_line_item_to_seamstress__(line_item_id, seamstress_id)
         data = {
             'message': "Assigment Successful.",
@@ -201,6 +215,21 @@ def filter_line_items_by_seamstress(request, callback):
         else:
             filter = 'none'
         return redirect('production_scheduler:historial', option=callback, filter=filter)
+    raise(Http404)
+
+@login_required()
+def send_message(request):
+    if (request.method == "POST"):
+        message_body = request.POST['message_body']
+        line_item_id = request.POST['line_item_id']
+        print(request.user.id)
+        message = Message(
+                    line_item_id= LineItem.objects.get(pk=line_item_id),
+                    message_body = message_body,
+                    username=CustomUser.objects.get(pk=request.user.id)
+                )
+        message.save()
+        return redirect('production_scheduler:mensajes', line_item_id=line_item_id)
     raise(Http404)
 
 #Post method for line item status update
