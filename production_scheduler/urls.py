@@ -5,7 +5,11 @@ from . import views
 
 app_name = 'production_scheduler'
 urlpatterns = [
-    path('', views.HomeView.as_view(), name='home'),
-    path('change_line_item_status/', views.change_line_item_status, name='change_line_item_status'),
-    path('assign_line_item_to_seamstress/', views.assign_line_item_to_seamstress, name='assign_line_item_to_seamstress'),
+    path('', views.NewOrdersView.as_view(), name='new_orders'),
+    path('historial/<option>/<filter>', views.historial, name='historial'),
+    path('assign_line_item_to_seamstress/<option>', views.assign_line_item_to_seamstress, name='assign_line_item_to_seamstress'),
+    path('update_line_item_status/', views.update_line_item_status, name='update_line_item_status'),
+    path('filter_line_items_by_seamstress/<callback>', views.filter_line_items_by_seamstress, name='filter_line_items_by_seamstress'),
+    path('mensajes/<line_item_id>', views.mensajes, name='mensajes'),
+    path('send_message/', views.send_message, name='send_message'),
 ]
