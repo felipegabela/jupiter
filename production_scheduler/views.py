@@ -1,6 +1,7 @@
 import urllib.parse
 import requests
 import numbers
+import os
 
 from django.shortcuts import render, redirect
 from django.http import Http404
@@ -133,8 +134,8 @@ class NewOrdersView(LoginRequiredMixin, View):
 
             #Shopify Order API
             url = 'https://@remu-international.myshopify.com/admin/api/2020-01/orders.json?'
-            user = '6e4440f817fb00deef93767c52f24830'
-            password = 'c2bf6e5be194d46e2d8b7b6b3b137a4f'
+            user = os.environ.get('SHOPIFY_API_DEV_USER')
+            password = os.environ.get('SHOPIFY_API_DEV_PASS')
             #GET API call
             query_params={
                 'fields': 'order_number, id, created_at, fulfillment_status, line_items',
