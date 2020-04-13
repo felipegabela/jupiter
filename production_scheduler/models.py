@@ -14,7 +14,6 @@ class Seamstress(models.Model):
     seamstress_id = models.AutoField(primary_key=True)
     alias = models.CharField(max_length=100, blank=True, null=True)
     username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    workshop = models.CharField(max_length=50)
 
     def __str__(self):
         return self.alias
