@@ -133,7 +133,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # EMAIL_HOST_USER = os.environ.get('GMAIL_USER_JUPITER')
 # EMAIL_HOST_PASSWORD = os.environ.get('GMAIL_PASS_JUPITER')
 
-EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' #'sendgrid_backend.SendgridBackend'
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_HOST_USER = 'apikey'
