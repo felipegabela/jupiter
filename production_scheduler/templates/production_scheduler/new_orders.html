@@ -5,16 +5,6 @@
 
 {% block content %}
 
-{% if http_status != 200 %}
-  <h4>HTTP Error {{ http_status }}. Couldn't retrieve new orders </h4>
-{% endif %}
-{% if timeout == True %}
-  <h4>Error: Conection timeout. Couldn't retrieve new orders.</h4>
-{% endif %}
-{% if connection_error == True %}
-  <h4>Error: Connection Error. Couldn't retrieve new orders. </h4>
-{% endif %}
-
 <br>
 <div class="table-responsive">
 <table id ="new_orders_table" class="table table-hover" cellspacing="0">
@@ -25,6 +15,7 @@
       <th scope="col">Producto</th>
       <th scope="col">Cantidad</th>
       <th scope="col">Fecha Orden</th>
+      <th scope="col">Fecha Asignacion</th>
       <th scope="col">Asignado a</th>
       <th scope="col">Estado</th>
       <th scope="col">Entregado</th>
@@ -46,6 +37,7 @@
         <td>{{ line_item.title }}</td>
         <td>{{ line_item.quantity }}</td>
         <td>{{ line_item.created_at }}</td>
+        <td>{{ line_item.fecha_assignacion }}</td>
         <td id='{{ line_item.line_item_id }}assigned_field'>{{ line_item.assigned_to }}</td>
         <td>{{ line_item.get_status_display }}</td>
         <td>{{ line_item.fecha_entrega }}</td>
@@ -70,7 +62,7 @@
             {{ lineItemSpecialInstructionsForm | crispy }}
             <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
             <input type="hidden" id="uptdate_line_item_status_to_assigned" name="uptdate_line_item_status_to_assigned">
-            <button type="submit" class="btn btn-sm btn-block btn-dark">Dismiss</button>
+            <button type="submit" class="btn btn-sm btn-block btn-dark">Confirmar Asignación</button>
           </form>
         </td>
         <td><a href="{% url 'production_scheduler:mensajes' line_item.line_item_id %}">Ir a mensajes</a></td>

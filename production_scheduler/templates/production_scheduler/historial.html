@@ -27,6 +27,7 @@
       <th scope="col">Producto</th>
       <th scope="col">Cantidad</th>
       <th scope="col">Fecha Orden</th>
+      <th scope="col">Fecha Asignación</th>
       <th scope="col">Asignado a</th>
       <th scope="col">Estado</th>
       <th scope="col">Entregado</th>
@@ -46,6 +47,7 @@
         <td>{{ line_item.title }}</td>
         <td>{{ line_item.quantity }}</td>
         <td>{{ line_item.created_at }}</td>
+        <td>{{ line_item.fecha_assignacion }}</td>
         <td>{{ line_item.assigned_to }}</td>
         <td>{{ line_item.get_status_display }}</td>
         <td>{{ line_item.fecha_entrega }}</td>

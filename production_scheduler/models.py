@@ -28,6 +28,7 @@ class LineItem(models.Model):
     order_number = models.CharField(max_length=20)
     created_at = models.DateField()
     assigned_to = models.ForeignKey(Seamstress, on_delete=models.SET_NULL, blank=True, null=True)
+    fecha_assignacion = models.DateField(blank=True, null=True)
     special_instructions = models.CharField(max_length=300, blank=True, null=True)
     #Choices
     NEW = 0
