@@ -11,12 +11,12 @@ def historial(request, option, filter):
 
     #Historial Seamstress View
     if (request.user.groups.filter(name='seamstress').exists()
-            and option == 'costurera') :
+            and option == 'costurera' and filter == 'none') :
         template_name='production_scheduler/historial.html'
         #Retrieve all line items assigned to seamstress from data base
         user_id = request.user.id
         seamstress_id = Seamstress.objects.get(username=user_id).seamstress_id
-        line_items_list = retrieve_orders_assigned_to_seamstress__(seamstress_id)
+        line_items_list = retrieve_all_orders_assigned_to_seamstress__(seamstress_id)
         context = {
             'line_items_list': line_items_list,
             'option': option,

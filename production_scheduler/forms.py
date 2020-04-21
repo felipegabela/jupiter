@@ -33,7 +33,7 @@ class LineItemEntregadaForm(forms.Form):
 
 class LineItemSpecialInstructionsForm(forms.Form):
     nota = forms.CharField(
-                label=False,required=False, 
+                label=False,required=False,
                 widget=forms.Textarea(
                         attrs={
                             'rows':4,

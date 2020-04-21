@@ -20,7 +20,7 @@ class NewOrdersView(LoginRequiredMixin, View):
         #Seamstress View
         if self.request.user.groups.filter(name='seamstress').exists():
             template_name='production_scheduler/mis-ordenes.html'
-            form = StatusForm
+            form = StatusForm #2,3,4,7
             #Retrieve new others from data base
             user_id = self.request.user.id
             seamstress_id = Seamstress.objects.get(username=user_id).seamstress_id
@@ -33,7 +33,6 @@ class NewOrdersView(LoginRequiredMixin, View):
         if self.request.user.groups.filter(name='coordinator').exists():
             template_name='production_scheduler/new_orders.html'
             response_status = None
-            timeout, connection_error, http_error = [False] * 3
             orders = []
             form = SeamstressListForm
             lineItemSpecialInstructionsForm = LineItemSpecialInstructionsForm
@@ -72,12 +71,11 @@ class NewOrdersView(LoginRequiredMixin, View):
                     messages.error(request, error)
 
             #Retrieve new others from data base
-            line_items_list = retrieve_orders_by_status__(0) #NEW = 0
+            line_items_list = retrieve_orders_by_status__(0)
 
             context = {
                 'line_items_list': line_items_list,'http_status': response_status,
-                'timeout': timeout, 'connection_error': connection_error,
-                'http_error' : http_error, 'form' : form,
+                'form' : form,
                 'lineItemSpecialInstructionsForm': lineItemSpecialInstructionsForm,
                 }
 
