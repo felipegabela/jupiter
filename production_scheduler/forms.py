@@ -1,6 +1,6 @@
 from django import forms
 from django.shortcuts import render
-from .models import Seamstress, LineItem, Message
+from .models import Seamstress, LineItem, Log
 
 class SeamstressListForm(forms.Form):
     seamstress_id = forms.ChoiceField(label=False, choices=[(seamstress.seamstress_id, seamstress.alias) for seamstress in Seamstress.objects.all()])
@@ -44,8 +44,8 @@ class LineItemSpecialInstructionsForm(forms.Form):
                     )
                 )
 
-class MessageForm(forms.ModelForm):
-    message_body = forms.CharField(
+class LogForm(forms.ModelForm):
+    event_body = forms.CharField(
                 label=False,
                 widget=forms.Textarea(
                         attrs={
@@ -55,7 +55,7 @@ class MessageForm(forms.ModelForm):
                     )
                 )
     class Meta:
-        model = Message
+        model = Log
         fields = [
-            'message_body'
+            'event_body'
         ]

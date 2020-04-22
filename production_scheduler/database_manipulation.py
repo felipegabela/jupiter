@@ -1,17 +1,31 @@
 from .models import LineItem, Seamstress
-from .models import Product, Message
+from .models import Product, Log, InboxReadControl
 from django.db.models import Exists
+from django.utils import timezone
+from users.models import CustomUser
+from django.utils.timezone import make_aware
 import datetime
+import pytz
 
 # Retrieve all line items in progresss assigned to a seamstress from database
 # Used in: new_orders_view > NewOrdersView > get > Seamstress View
-def retrieve_orders_in_progress_assigned_to_seamstress__(seamstress_id):
+def retrieve_orders_in_progress_assigned_to_seamstress__(seamstress_id, user_id):
     line_items = LineItem.objects.filter(assigned_to=seamstress_id).order_by('order_number')
     line_items_list = []
     for item in line_items:
         if item.status != 5:
             line_items_list.append(item)
-    return line_items_list
+    # line items with new activity
+    user = CustomUser.objects.get(id = user_id)
+    new_activity_ls = []
+    for item in line_items:
+        last_event_viewed_date = InboxReadControl.objects.filter(username = user, line_item_id = item)[0].last_event_viewed_date
+        last_publication_date = Log.objects.filter(line_item_id=item).order_by('-publication_date')[0].publication_date
+        if last_publication_date >= last_event_viewed_date:
+            new_activity_ls.append(True)
+        else:
+            new_activity_ls.append(False)
+    return line_items_list, new_activity_ls
 
 # Update line item status
 # Response codes:
@@ -93,8 +107,37 @@ def retrieve_all_orders_assigned_to_seamstress__(seamstress_id):
     line_items_list = [item for item in line_items]
     return line_items_list
 
+# Create Inbox: last event read functionality
+def create_inbox__(line_item_id):
+    # Creating row for seamstress
+    seamstress_id = LineItem.objects.get(line_item_id=line_item_id).assigned_to.seamstress_id
+    seamtress_username = Seamstress.objects.get(seamstress_id=seamstress_id).username
+    line_item_id_instance = LineItem.objects.get(line_item_id=line_item_id)
+    new_row = InboxReadControl(username=seamtress_username,
+        line_item_id=line_item_id_instance, last_event_viewed_date=make_aware(datetime.datetime.now()))
+    new_row.save()
+    # Creating row for all coordinators
+    users = CustomUser.objects.filter(groups__name='coordinator')
+    for user in users:
+        new_row = InboxReadControl(username=user,
+            line_item_id=line_item_id_instance, last_event_viewed_date=make_aware(datetime.datetime.now()))
+        new_row.save()
+
+# Retrieve line item log from database
+def retrieve_line_item_log__(line_item_id):
+    log = Log.objects.filter(line_item_id=line_item_id).order_by('publication_date')
+    log_list = [event for event in log]
+    return log_list
 
 
+def add_log_event__(user_id, event_body, line_item_id):
+    event = Log(
+                line_item_id= LineItem.objects.get(pk=line_item_id),
+                event_body = event_body,
+                username=CustomUser.objects.get(pk=user_id),
+                is_event = True
+            )
+    event.save()
 
 #Retrieve orders from database by status and seamstress
 def retrieve_orders_by_status_seamstress__(status, seamstress):
@@ -142,9 +185,7 @@ def save_new_orders(orders):
                        order_id=order['id'], order_number=order['order_number'],
                        created_at=date, status=0)
                    new_line_item.save()
-
-#Retrieve messages from database assigned to and especific line_item
-def retrieve_messages_by_line_item__(line_item_id):
-    messages = Message.objects.filter(line_item_id=line_item_id)
-    messages_list = [item for item in messages]
-    return messages_list
+                   # Registrando evento creacion en el log
+                   event_body = 'Line item creado en la base de datos.'
+                   line_item_id = item['id']
+                   add_log_event__(1, event_body, line_item_id)

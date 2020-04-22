@@ -5,16 +5,23 @@
 
 {% block content %}
 <div class="my-3 p-3 bg-white rounded box-shadow">
-  <h6 class="border-bottom border-gray pb-2 mb-0">Mensajes Order # {{ line_item_id }}</h6>
-  {% for mensaje in mensajes %}
+  <h6 class="border-bottom border-gray pb-2 mb-0">Log Orden # {{ line_item_id }}</h6>
+  {% for event in log %}
     <div class="media text-muted pt-3">
       <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-        <strong class="d-block text-gray-dark">@{{ mensaje.username }} on {{ mensaje.publication_date }}</strong> {{ mensaje.message_body }}
+        <strong class="d-block text-gray-dark">
+          {% if event.is_event == False %}
+            @{{ event.username }}
+          {% else %}
+            System event
+          {% endif %}
+          on {{ event.publication_date }}
+        </strong> {{ event.event_body }}
     </div>
   {% endfor %}
 </div>
 
-<form method="POST" action="{% url 'production_scheduler:send_message' %}">
+<form method="POST" action="{% url 'production_scheduler:add_log_message' %}">
   {% csrf_token %}
   {{ form| crispy}}
   <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item_id }}'>

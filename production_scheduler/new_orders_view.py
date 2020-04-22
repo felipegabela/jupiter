@@ -24,9 +24,10 @@ class NewOrdersView(LoginRequiredMixin, View):
             #Retrieve new others from data base
             user_id = self.request.user.id
             seamstress_id = Seamstress.objects.get(username=user_id).seamstress_id
-            line_items_list = retrieve_orders_in_progress_assigned_to_seamstress__(seamstress_id)
+            line_items_list, new_activity_ls = retrieve_orders_in_progress_assigned_to_seamstress__(seamstress_id, user_id)
             context = {
                 'line_items_list': line_items_list, 'form': form,
+                'new_activity_ls': new_activity_ls,
                 }
 
         #Coordinator View

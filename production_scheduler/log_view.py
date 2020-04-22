@@ -7,34 +7,34 @@ from django.shortcuts import render, redirect
 from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from .models import LineItem, Message
+from .models import LineItem, Log
 from .database_manipulation import *
 from .forms import *
 from users.models import CustomUser
 
 @login_required()
-def mensajes(request, line_item_id):
-    template_name = 'production_scheduler/mensajes.html'
-    form = MessageForm
-    mensajes = retrieve_messages_by_line_item__(line_item_id)
+def log(request, line_item_id):
+    template_name = 'production_scheduler/log.html'
+    form = LogForm
+    log = retrieve_line_item_log__(line_item_id)
     context = {
                 'line_item_id':line_item_id,
                 'form':form,
-                'mensajes':mensajes
+                'log':log
             }
     return render(request, template_name, context)
 
 @login_required()
-def send_message(request):
+def add_log_message(request):
     if (request.method == "POST"):
-        message_body = request.POST['message_body']
+        event_body = request.POST['event_body']
         line_item_id = request.POST['line_item_id']
-        print(request.user.id)
-        message = Message(
+        log = Log(
                     line_item_id= LineItem.objects.get(pk=line_item_id),
-                    message_body = message_body,
-                    username=CustomUser.objects.get(pk=request.user.id)
+                    event_body = event_body,
+                    username=CustomUser.objects.get(pk=request.user.id),
+                    is_event = False
                 )
-        message.save()
-        return redirect('production_scheduler:mensajes', line_item_id=line_item_id)
+        log.save()
+        return redirect('production_scheduler:log', line_item_id=line_item_id)
     raise(Http404)

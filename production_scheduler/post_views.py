@@ -46,6 +46,7 @@ def assign_line_item_to_seamstress(request, option):
         elif db_response_code == 1:
             update_line_time_special_instructions__(line_item_id, nota)
             update_line_item_assignment_date(line_item_id, currentDate= True)
+            create_inbox__(line_item_id)
             messages.success(request, "Line item assignado exitosamente!")
         else:
             error_code = "update_line_item_status__ response code: " + str(db_response_code)
