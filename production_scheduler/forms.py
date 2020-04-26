@@ -3,8 +3,7 @@ from django.shortcuts import render
 from .models import Seamstress
 
 class SeamstressListForm(forms.Form):
-    seamstress_id = forms.ChoiceField(label=False, choices=['1','2'])
-    #seamstress_id = forms.ChoiceField(label=False, choices=[(seamstress.seamstress_id, seamstress.alias) for seamstress in Seamstress.objects.all()])
+    seamstress_id = forms.ChoiceField(label=False, choices=[(seamstress.seamstress_id, seamstress.alias) for seamstress in Seamstress.objects.all()])
 
 class StatusForm(forms.Form):
     #Choices
