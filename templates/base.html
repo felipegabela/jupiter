@@ -1,5 +1,4 @@
 {% load static %}
-{% load user_group_validation %}
 
 <!DOCTYPE html>
 <html lang="es" dir="ltr">
@@ -10,76 +9,20 @@
     <!-- Bootstrap CSS-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!--Login CSS-->
-    <link href="{% static 'production_scheduler/css/login.css' %}" rel="stylesheet">
-
+    <link href="{% static 'css/login.css' %}" rel="stylesheet">
     <title>Production Scheduler</title>
-
-
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <!-- Production Scheduler JavaScript-->
-    <script src="{% static 'production_scheduler/js/production_scheduler.js' %}"></script>
-
   </head>
   <body>
-      <!--Navegation Bar-->
-      <nav class="navbar navbar-dark bg-dark navbar-expand-md fixed-top">
-        <a class="navbar-brand" href="#">Remu Apparel</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'production_scheduler:new_orders' %}">Nuevas Ordenes <span class="sr-only">(current)</span></a>
-            </li>
-            {% if request.user|has_group:"coordinator" %}
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Ordenes Asignadas
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <a class="dropdown-item" href="{% url 'production_scheduler:historial' option='produccion' filter='none' %}">En Producción</a>
-                  <a class="dropdown-item" href="{% url 'production_scheduler:historial' option='terminadas' filter='none' %}">Terminadas</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="{% url 'production_scheduler:historial' option='entregadas' filter='none' %}">Entregadas</a>
-                </div>
-              </li>
-            {% endif %}
-            {% if request.user|has_group:"seamstress" %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'production_scheduler:historial' option='costurera' filter='none' %}">Historial</a>
-              </li>
-            {% endif %}
-
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <!-- Navbar Right Side -->
-            <div class="navbar-nav">
-              {% if user.is_authenticated %}
-                <p class="nav-item nav-link disabled">Hola, {{ user.username }}</p>
-                <a class="nav-item nav-link" href="#">Profile</a>
-                <a class="nav-item nav-link" href="{% url 'logout' %}">
-                  <svg class="bi bi-box-arrow-in-right" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M8.146 11.354a.5.5 0 010-.708L10.793 8 8.146 5.354a.5.5 0 11.708-.708l3 3a.5.5 0 010 .708l-3 3a.5.5 0 01-.708 0z" clip-rule="evenodd"/>
-                    <path fill-rule="evenodd" d="M1 8a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9A.5.5 0 011 8z" clip-rule="evenodd"/>
-                    <path fill-rule="evenodd" d="M13.5 14.5A1.5 1.5 0 0015 13V3a1.5 1.5 0 00-1.5-1.5h-8A1.5 1.5 0 004 3v1.5a.5.5 0 001 0V3a.5.5 0 01.5-.5h8a.5.5 0 01.5.5v10a.5.5 0 01-.5.5h-8A.5.5 0 015 13v-1.5a.5.5 0 00-1 0V13a1.5 1.5 0 001.5 1.5h8z" clip-rule="evenodd"/>
-                  </svg>
-                </a>
-              {% else %}
-                <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
-              {% endif %}
-            </div>
-          </ul>
-        </div>
-      </nav>
-
+    <!--Navegation Bar-->
+    {% include 'navbar.html' %}
     <main role="main" class="container-fluid">
       <div class="row">
         <div class="col-md-12">
+          <!--Messages-->
           {% for message in messages %}
             <div class="alert {{ message.tags }} alert-dismissible" role="alert">
               <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -88,6 +31,7 @@
               {{ message }}
             </div>
           {% endfor %}
+          <!--Page Content-->
           {% block content %}{% endblock %}
         </div>
       </div>

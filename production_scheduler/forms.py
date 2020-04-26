@@ -1,6 +1,6 @@
 from django import forms
 from django.shortcuts import render
-from .models import Seamstress, LineItem, Log
+from .models import Seamstress
 
 class SeamstressListForm(forms.Form):
     seamstress_id = forms.ChoiceField(label=False, choices=[(seamstress.seamstress_id, seamstress.alias) for seamstress in Seamstress.objects.all()])
@@ -43,19 +43,3 @@ class LineItemSpecialInstructionsForm(forms.Form):
                         }
                     )
                 )
-
-class LogForm(forms.ModelForm):
-    event_body = forms.CharField(
-                label=False,
-                widget=forms.Textarea(
-                        attrs={
-                            'rows':4,
-                            'cols':15,
-                        }
-                    )
-                )
-    class Meta:
-        model = Log
-        fields = [
-            'event_body'
-        ]

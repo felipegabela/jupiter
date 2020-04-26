@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', include('production_scheduler.urls')),
+    path('log/', include('log.urls')),
     path('admin/', admin.site.urls, name='admin'),
     path('login/',
         auth_views.LoginView.as_view(template_name='registration/login.html', redirect_authenticated_user=True),

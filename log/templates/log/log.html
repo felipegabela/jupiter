@@ -21,7 +21,7 @@
   {% endfor %}
 </div>
 
-<form method="POST" action="{% url 'production_scheduler:add_log_message' %}">
+<form method="POST" action="{% url 'log:add_log_message' %}">
   {% csrf_token %}
   {{ form| crispy}}
   <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item_id }}'>

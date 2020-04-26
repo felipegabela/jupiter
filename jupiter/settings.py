@@ -21,6 +21,7 @@ ALLOWED_HOSTS = ['jupiter-production-scheduler.herokuapp.com']
 
 INSTALLED_APPS = [
     'production_scheduler.apps.ProductionSchedulerConfig',
+    'log.apps.LogConfig',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -106,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-us' # es-ec
 
 TIME_ZONE = 'America/Bogota'
 

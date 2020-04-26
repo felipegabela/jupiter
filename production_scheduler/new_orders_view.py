@@ -9,7 +9,7 @@ from requests.exceptions import Timeout
 from requests.exceptions import ConnectionError
 from django.views.generic import View
 from .models import Seamstress
-from .database_manipulation import *
+from .db_manipulation import *
 from .forms import *
 from django.contrib import messages
 
@@ -72,7 +72,7 @@ class NewOrdersView(LoginRequiredMixin, View):
                     messages.error(request, error)
 
             #Retrieve new others from data base
-            line_items_list = retrieve_orders_by_status__(0)
+            line_items_list = retrieve_orders_by_status_cview__(0)
 
             context = {
                 'line_items_list': line_items_list,'http_status': response_status,

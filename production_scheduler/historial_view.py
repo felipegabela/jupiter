@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import Seamstress
-from .database_manipulation import *
+from .db_manipulation import *
 from .forms import *
 
 @login_required()
@@ -16,10 +16,10 @@ def historial(request, option, filter):
         #Retrieve all line items assigned to seamstress from data base
         user_id = request.user.id
         seamstress_id = Seamstress.objects.get(username=user_id).seamstress_id
-        line_items_list = retrieve_all_orders_assigned_to_seamstress__(seamstress_id)
+        line_items_list, new_activity_ls = retrieve_all_orders_assigned_to_seamstress__(seamstress_id, user_id)
         context = {
             'line_items_list': line_items_list,
-            'option': option,
+            'option': option, 'new_activity_ls': new_activity_ls,
             }
         return render(request, template_name, context)
 
@@ -30,13 +30,14 @@ def historial(request, option, filter):
         seamstressListForm = SeamstressListForm
         #Retrieve all current line items in production from data base
         if filter != 'none':
-            line_items_list = retrieve_orders_in_production_by_seamstress__(filter)
+            line_items_list, new_activity_ls = retrieve_orders_in_production_by_seamstress__(filter, request.user.id)
         else:
-            line_items_list = retrieve_orders_in_production_by_seamstress__(None)
+            line_items_list, new_activity_ls = retrieve_orders_in_production_by_seamstress__(None, request.user.id)
         context = {
             'line_items_list': line_items_list,
             'option': option, 'coordinator': True,
             'seamstressListForm': seamstressListForm,
+            'new_activity_ls': new_activity_ls,
             }
         return render(request, template_name, context)
 
@@ -47,14 +48,15 @@ def historial(request, option, filter):
         seamstressListForm = SeamstressListForm
         lineItemEntregadaForm = LineItemEntregadaForm
         if filter != 'none':
-            line_items_list = retrieve_orders_by_status_seamstress__(4, filter) #4 = Terminada
+            line_items_list, new_activity_ls = retrieve_orders_by_status_seamstress__(4, filter, request.user.id) #4 = Terminada
         else:
-            line_items_list = retrieve_orders_by_status__(4) #4 = Terminada
+            line_items_list, new_activity_ls = retrieve_orders_by_status__(4, request.user.id) #4 = Terminada
         context = {
             'line_items_list': line_items_list,
             'option': option, 'coordinator': True,
             'seamstressListForm': seamstressListForm, 'callback_path': request.path,
             'terminadas': True, 'lineItemEntregadaForm': lineItemEntregadaForm,
+            'new_activity_ls': new_activity_ls,
             }
         return render(request, template_name, context)
 
@@ -65,14 +67,15 @@ def historial(request, option, filter):
         seamstressListForm = SeamstressListForm
         lineItemEntregadaForm = LineItemEntregadaForm
         if filter != 'none':
-            line_items_list = retrieve_orders_by_status_seamstress__(5, filter) #5 = Entregadas
+            line_items_list, new_activity_ls = retrieve_orders_by_status_seamstress__(5, filter, request.user.id) #5 = Entregadas
         else:
-            line_items_list = retrieve_orders_by_status__(5) #5 = Entregadas
+            line_items_list, new_activity_ls = retrieve_orders_by_status__(5, request.user.id) #5 = Entregadas
         context = {
             'line_items_list': line_items_list,
             'option': option, 'coordinator': True,
             'seamstressListForm': seamstressListForm,
             'entregadas' : True, 'lineItemEntregadaForm': lineItemEntregadaForm,
+            'new_activity_ls': new_activity_ls,
             }
         return render(request, template_name, context)
     else:

@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import LineItem
 from .models import Seamstress
-from .database_manipulation import *
+from .db_manipulation import *
 from django.contrib import messages
 
 #Post method to assign line item to seamstress
@@ -37,17 +37,23 @@ def assign_line_item_to_seamstress(request, option):
             and request.method == "POST" and option == 'change_status'):
         line_item_id = request.POST['line_item_id']
         nota = request.POST['nota']
-        db_response_code = update_line_item_status__(line_item_id, '1')
+        db_response_code, current_status = update_line_item_status__(line_item_id, '1')
 
         if db_response_code == -1:
             messages.error(request, "Line item doesn't exist.")
         elif  db_response_code == 0:
             messages.warning(request, "Por favor asignar a alguien primero.")
         elif db_response_code == 1:
+            # Line item assignado exitosamente!
             update_line_time_special_instructions__(line_item_id, nota)
             update_line_item_assignment_date(line_item_id, currentDate= True)
             create_inbox__(line_item_id)
             messages.success(request, "Line item assignado exitosamente!")
+            # Registrando evento asignacio
+            usuario = request.user.username
+            seamstress_username = get_seamstress_assigned_to_line_item(line_item_id)
+            event_body = '@' + usuario + ' asignó el producto a @' + str(seamstress_username)
+            add_log_event__(request.user.id, event_body, line_item_id)
         else:
             error_code = "update_line_item_status__ response code: " + str(db_response_code)
             messages.error(request, error_code)
@@ -65,17 +71,25 @@ def update_line_item_status(request):
         status = request.POST['status']
         line_item_id = request.POST['line_item_id']
         # Check if it is an allowed status: 2/CO, 3/AR, 4/TE, 7/COR
-        # ...
-        # send message here if the status new code is invalid
-
-        # If the status code is valid proceed
-        update_line_item_status__(line_item_id, status)
-        status_display_name = LineItem.objects.get(line_item_id=line_item_id).get_status_display()
-        data = {
-            'message': "Successfully Updated Status.",
-            'line_item_id': line_item_id,
-            'new_status': status_display_name
-        }
+        if status in ['2','3','4', '7']:
+            # If the status code is valid proceed
+            db_response_code, current_status = update_line_item_status__(line_item_id, status)
+            if db_response_code == 1:
+                status_display_name = LineItem.objects.get(line_item_id=line_item_id).get_status_display()
+                data = {
+                    'message': "Successfully Updated Status.",
+                    'line_item_id': line_item_id,
+                    'new_status': status_display_name
+                }
+                # Registrando evento cambio de status
+                STATUS_CHOICES = {
+                '0':'Nueva', '1':'Asignada', '2':'Cortando','3': 'Armando',
+                '4':'Terminada','5':'Entregada','6':'Corregir Error',
+                '7':'Corrigiendo'
+                }
+                usuario = request.user.username
+                event_body = '@' + usuario + ' cambio el status de ' + STATUS_CHOICES[str(current_status)] + ' a ' + STATUS_CHOICES[status]
+                add_log_event__(request.user.id, event_body, line_item_id)
         return JsonResponse(data)
     # Coordinator call from historial.html
     elif 'update_line_item_status' in request.POST and request.method == "POST":
@@ -87,11 +101,20 @@ def update_line_item_status(request):
             messages.error(request, "Status code invalid!")
         # If the status code is valid proceed
         else:
-            db_response_code = update_line_item_status__(line_item_id, status)
+            db_response_code, current_status = update_line_item_status__(line_item_id, status)
             if db_response_code == -1:
                 messages.error(request, "Line item doesn't exist.")
             elif db_response_code == 1:
                 messages.success(request, "Status actualizado exitosamente!")
+                # Registrando evento cambio de status
+                STATUS_CHOICES = {
+                '0':'Nueva', '1':'Asignada', '2':'Cortando','3': 'Armando',
+                '4':'Terminada','5':'Entregada','6':'Corregir Error',
+                '7':'Corrigiendo'
+                }
+                usuario = request.user.username
+                event_body = '@' + usuario + ' cambio el status de ' + STATUS_CHOICES[str(current_status)] + ' a ' + STATUS_CHOICES[status]
+                add_log_event__(request.user.id, event_body, line_item_id)
             else:
                 error_code = "update_line_item_status__ response code: " + db_response_code
                 messages.error(request, error_code)

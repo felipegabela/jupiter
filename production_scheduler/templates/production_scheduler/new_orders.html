@@ -69,6 +69,8 @@
         </td>
         {% endif %}
       </tr>
+      {% empty %}
+        <tr><h4>No hay nuevos ordenes.</h4></tr><br>
     {% endfor %}
   </tbody>
 </table>
