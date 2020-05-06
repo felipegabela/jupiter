@@ -8,6 +8,7 @@ from users.models import CustomUser
 from django.utils.timezone import make_aware
 import datetime
 import pytz
+from django.contrib import messages
 
 # NewOrdersView - Coordinator View
 
@@ -20,34 +21,39 @@ def retrieve_orders_by_status_cview__(status):
     return line_items_list
 
 #Save new line items to database
-def save_new_orders(orders):
+def save_new_orders(orders, request):
     for order in orders:
        for item in order['line_items']:
            #Checking if item has not been fulfilled yet
            if order['fulfillment_status'] is None:
                #Checking that product is not already in the database
                if not LineItem.objects.filter(line_item_id=item['id']).exists():
-                   product = Product.objects.get(product_sku=item['sku'])
-                   nombre_producto = product.nombre_producto
-                   split = nombre_producto.split(";")
-                   product_title= split[0]
-                   product_variant_title= split[1]
+                   # Check if SKU is created in db
+                   if not Product.objects.filter(product_sku=item['sku']).exists():
+                       error_message = "El SKU " + item['sku'] + " no existe en la base de datos. Por favor crearlo."
+                       messages.error(request, error_message)
+                   else:
+                       product = Product.objects.get(product_sku=item['sku'])
+                       nombre_producto = product.nombre_producto
+                       split = nombre_producto.split(";")
+                       product_title= split[0]
+                       product_variant_title= split[1]
 
-                   #Transforming Date
-                   datetime = order['created_at']
-                   tmp = datetime.split("T")
-                   date = tmp[0]
+                       #Transforming Date
+                       datetime = order['created_at']
+                       tmp = datetime.split("T")
+                       date = tmp[0]
 
-                   new_line_item = LineItem(
-                       line_item_id=item['id'], title=product_title, quantity=item['quantity'],
-                       product_sku=item['sku'], variant_title=product_variant_title,
-                       order_id=order['id'], order_number=order['order_number'],
-                       created_at=date, status=0)
-                   new_line_item.save()
-                   # Registrando evento creacion en el log
-                   event_body = 'Line item creado en la base de datos.'
-                   line_item_id = item['id']
-                   add_log_event__(1, event_body, line_item_id)
+                       new_line_item = LineItem(
+                           line_item_id=item['id'], title=product_title, quantity=item['quantity'],
+                           product_sku=item['sku'], variant_title=product_variant_title,
+                           order_id=order['id'], order_number=order['order_number'],
+                           created_at=date, status=0)
+                       new_line_item.save()
+                       # Registrando evento creacion en el log
+                       event_body = 'Line item creado en la base de datos.'
+                       line_item_id = item['id']
+                       add_log_event__(1, event_body, line_item_id)
 
 # -------------------------------------------------------
 

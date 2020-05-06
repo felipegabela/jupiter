@@ -31,7 +31,7 @@ class NewOrdersView(LoginRequiredMixin, View):
                 }
 
         #Coordinator View
-        if self.request.user.groups.filter(name='coordinator').exists():
+        elif self.request.user.groups.filter(name='coordinator').exists():
             template_name='production_scheduler/new_orders.html'
             response_status = None
             orders = []
@@ -66,7 +66,7 @@ class NewOrdersView(LoginRequiredMixin, View):
                 if response_status == 200:
                     response_body = response.json()
                     orders = response_body['orders']
-                    save_new_orders(orders)
+                    save_new_orders(orders, request)
                 else:
                     error = 'HTTP Error ' + str(response_status) + "Couldn't retrieve new orders."
                     messages.error(request, error)
@@ -79,5 +79,9 @@ class NewOrdersView(LoginRequiredMixin, View):
                 'form' : form,
                 'lineItemSpecialInstructionsForm': lineItemSpecialInstructionsForm,
                 }
+        #No group assigned
+        else:
+            template_name='production_scheduler/error.html'
+            context = {}
 
         return render(request, template_name, context)
