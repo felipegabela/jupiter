@@ -1,5 +1,3 @@
-
-##
 import urllib.parse
 import requests
 import os
@@ -39,13 +37,6 @@ class NewOrdersView(LoginRequiredMixin, View):
             orders = []
             form = SeamstressListForm
             lineItemSpecialInstructionsForm = LineItemSpecialInstructionsForm
-
-            ##
-
-            ##
-
-
-
 
             #Shopify Order API
             url = 'https://@remu-international.myshopify.com/admin/api/2020-01/orders.json?'
