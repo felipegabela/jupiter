@@ -1,3 +1,8 @@
+# using SendGrid's Python Library
+# https://github.com/sendgrid/sendgrid-python
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+##
 import urllib.parse
 import requests
 import os
@@ -37,6 +42,25 @@ class NewOrdersView(LoginRequiredMixin, View):
             orders = []
             form = SeamstressListForm
             lineItemSpecialInstructionsForm = LineItemSpecialInstructionsForm
+
+            ##
+            message = Mail(
+                from_email='gabelafelipe@gmail.com',
+                to_emails='felipe@remuapparel.com',
+                subject='Sending with Twilio SendGrid is Fun',
+                html_content='<strong>and easy to do anywhere, even with Python</strong>')
+            try:
+                sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                response = sg.send(message)
+                print(response.status_code)
+                print(response.body)
+                print(response.headers)
+            except Exception as e:
+                print(e.message)
+            ##
+
+
+
 
             #Shopify Order API
             url = 'https://@remu-international.myshopify.com/admin/api/2020-01/orders.json?'
