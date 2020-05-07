@@ -151,6 +151,9 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
 
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 
 
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
