@@ -1,7 +1,7 @@
 # using SendGrid's Python Library
 # https://github.com/sendgrid/sendgrid-python
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from sendgrid.helpers.mail import *
 ##
 import urllib.parse
 import requests
@@ -44,7 +44,7 @@ class NewOrdersView(LoginRequiredMixin, View):
             lineItemSpecialInstructionsForm = LineItemSpecialInstructionsForm
 
             ##
-            message = Mail(
+            message = sendgrid.helpers.mail.Mail(
                 from_email='gabelafelipe@gmail.com',
                 to_emails='felipe@remuapparel.com',
                 subject='Sending with Twilio SendGrid is Fun',
