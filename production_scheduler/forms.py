@@ -3,17 +3,17 @@ from django.shortcuts import render
 from .models import Seamstress
 
 class SeamstressListForm(forms.Form):
-    #Choices
-    TERMINADA = 4
-    ENTREGADA = 5
-    ERROR = 6
-    STATUS_CHOICES = (
-    (TERMINADA, 'Terminada'),
-    (ENTREGADA, 'Entregada'),
-    (ERROR, 'Corregir Error')
-    )
-    seamstress_id = forms.ChoiceField( label=False, choices=STATUS_CHOICES)
-    #seamstress_id = forms.ChoiceField(label=False, choices=[(seamstress.seamstress_id, seamstress.alias) for seamstress in Seamstress.objects.all()])
+    # #Choices
+    # TERMINADA = 4
+    # ENTREGADA = 5
+    # ERROR = 6
+    # STATUS_CHOICES = (
+    # (TERMINADA, 'Terminada'),
+    # (ENTREGADA, 'Entregada'),
+    # (ERROR, 'Corregir Error')
+    # )
+    # seamstress_id = forms.ChoiceField( label=False, choices=STATUS_CHOICES)
+    seamstress_id = forms.ChoiceField(label=False, choices=[(seamstress.seamstress_id, seamstress.alias) for seamstress in Seamstress.objects.all()])
 
 class StatusForm(forms.Form):
     #Choices
