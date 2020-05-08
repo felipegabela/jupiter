@@ -68,18 +68,6 @@
             </svg>
           </button>
         </td>
-        {% if entregadas == True  or terminadas == True %}
-          <td>
-            <form method="POST" action="{% url 'production_scheduler:update_line_item_status' %}">
-              {% csrf_token %}
-              {{ lineItemEntregadaForm | crispy }}
-              <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
-              <input type="hidden" id="update_line_item_status" name="update_line_item_status">
-              <input type="hidden" id="option" name="option" value='{{ option }}'>
-              <button type="submit" class="btn btn-sm btn-dark">Actualizar</button>
-            </form>
-          </td>
-        {% endif %}
         <td>
           <a href="{% url 'log:view_log' line_item.line_item_id %}" class="text-dark">
             <svg class="bi bi-archive" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -94,6 +82,18 @@
             {% endif %}
           </a>
         </td>
+        {% if entregadas == True  or terminadas == True %}
+          <td>
+            <form method="POST" action="{% url 'production_scheduler:update_line_item_status' %}">
+              {% csrf_token %}
+              {{ lineItemEntregadaForm | crispy }}
+              <input type="hidden" id="line_item_id" name="line_item_id" value='{{ line_item.line_item_id }}'>
+              <input type="hidden" id="update_line_item_status" name="update_line_item_status">
+              <input type="hidden" id="option" name="option" value='{{ option }}'>
+              <button type="submit" class="btn btn-sm btn-dark">Actualizar</button>
+            </form>
+          </td>
+        {% endif %}
       </tr>
     {% endfor %}
   </tbody>
