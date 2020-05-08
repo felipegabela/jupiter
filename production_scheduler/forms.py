@@ -1,6 +1,7 @@
 from django import forms
 from django.shortcuts import render
 from .models import Seamstress
+from django.forms import ModelChoiceField
 
 class SeamstressListForm(forms.Form):
     # #Choices#
@@ -13,7 +14,8 @@ class SeamstressListForm(forms.Form):
     # (ERROR, 'Corregir Error')
     # )
     # seamstress_id = forms.ChoiceField( label=False, choices=STATUS_CHOICES)
-    seamstress_id = forms.ChoiceField(label=False, choices=[(seamstress.seamstress_id, seamstress.alias) for seamstress in Seamstress.objects.all()])
+    seamstress_id = forms.ModelChoiceField(queryset=Seamstress.objects.all(), initial=0)
+    #seamstress_id = forms.ChoiceField(label=False, choices=[(seamstress.seamstress_id, seamstress.alias) for seamstress in Seamstress.objects.all()])
 
 class StatusForm(forms.Form):
     #Choices
