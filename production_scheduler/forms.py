@@ -3,7 +3,7 @@ from django.shortcuts import render
 from .models import Seamstress
 
 class SeamstressListForm(forms.Form):
-    # #Choices
+    # #Choices#
     # TERMINADA = 4
     # ENTREGADA = 5
     # ERROR = 6
